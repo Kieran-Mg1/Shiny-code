@@ -1,0 +1,151 @@
+## Hello! The following code describes how to create the reactive bar plot on my shiny dashboard. I'll assume you have some prior 
+knowledge of coding in R, but will explain the most difficult parts in more depth.
+
+# Load packages
+library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+
+# Increase upload file size
+options(shiny.maxRequestSize = 1000*1024^2)
+
+# This reads in the csv. used for this dataset. Notice the additional arguments which cleans the data for easier use 
+Res.dat <- read.csv("World Economic Outlook Database.csv"
+                    , fileEncoding = "UTF-8-BOM"
+                    , stringsAsFactors = FALSE
+                    , check.names = FALSE
+                    )
+
+
+
+# Define UI (user interface) for application 
+ui <- 
+    
+#The whole page    
+    dashboardPage(
+#Dashboard header
+    dashboardHeader(title = "Data Analysis", titleWidth = 300),
+#Dashboard sidebar
+    dashboardSidebar(
+        sidebarMenu(
+#Tabs
+            menuItem("Timeseries", tabName = "Timeseries")
+           
+        )
+    ),
+#Dashboard Body
+    dashboardBody(
+#Tab items
+    tabItems(
+    
+#Graph Tab content
+
+tabItem(tabName = "Timeseries",
+  
+#Layout the side bar where the interactive boxes will go
+ 
+           sidebarLayout(
+              sidebarPanel(
+                  em("Select multiple countries and years by typing in the box or using the dropdown."),
+                  br(),br(),
+                  
+ #"uiOutput" is a function that essentially renders more UI. 
+ # It’s usually used to create inputs (or any other UI) from the server (see later), or in other words - you can create inputs dynamically.
+ 
+                     uiOutput("countryOutput"),
+                     uiOutput("yearOutput"),
+                     uiOutput("vdOutput")
+                     ),
+                     
+  # The main graph plot will go here                                        
+               mainPanel(plotOutput("Timeseries", width = "100%"))
+                                    
+              ),
+ 
+#End of all tabs       
+    )
+#dashboard body
+    )
+#dashboard page
+)
+    
+
+# Define server logic required to draw a histogram
+
+server <- function(input, output) {
+# The next part creates the drop down boxes for each input, based on the column names in the dataset.    
+    #Inputs    
+        
+    output$countryOutput <- renderUI(
+        selectInput("countryInput", "Country Name", multiple = TRUE, sort(Res.dat$Country_Name)  
+                                                
+                        
+                                    ))
+    
+   
+    
+    output$yearOutput <- renderUI(
+        selectInput("yearInput", "Year", multiple = TRUE, sort(unique(Res.dat$Year)  )
+                                        
+       
+                                    ))
+    
+    
+    output$vdOutput <- renderUI(
+        selectInput("vdInput", "Value Descriptor",multiple = FALSE,
+                                    sort(
+                                         unique(Res.dat$Value_Descriptor))
+                    
+                                    ))
+    #Reactivity
+  # This is often considered the most complicated part of creating a interactive plot. What the below does is create a function
+  that means if no input is selected, the graph will be empty, rather than displaying an error message. It also essentially 
+  causes the plot to be reactive to inputs and dynamically change as the inputs change. I won't go into too much more detail,
+  but Dean Attali runs a excellent blog which explains this, https://deanattali.com/blog/building-shiny-apps-tutorial/#11-using-uioutput-to-create-ui-elements-dynamically
+  
+  
+   filtered <- reactive({
+       
+       if (is.null(input$countryInput)) {
+           return(NULL)
+       }    
+       
+       if (is.null(input$yearInput)) {
+           return(NULL)
+       }
+       
+       if (is.null(input$vdInput)) {
+           return(NULL)
+       }
+       
+    Res.dat %>% 
+        
+        filter(
+            Country_Name %in% input$countryInput,
+            Year %in% input$yearInput,
+            Value_Descriptor %in% input$vdInput
+                )
+           
+       
+   })
+    
+    #Plot
+     
+   
+   
+    output$Timeseries <- renderPlot({
+    
+        if (is.null(filtered())) {
+            return()
+        }
+        
+        
+        
+    ggplot(filtered(), aes(x=as.character(Year), y=Value, fill =Country_Name)) + 
+        geom_col(position = "dodge", na.rm = TRUE) + xlab("Year") + ylab("Value in Billions($)") +
+          ggtitle("World Economic Outlook Database 2016")
+    
+                                    })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
