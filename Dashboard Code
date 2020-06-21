@@ -1,0 +1,215 @@
+## Hello! The following is all the code for my shiny based website currently. 
+## I won’t explain what each line does here, but is shows how the dashboard itself is created. 
+
+
+library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+
+options(shiny.maxRequestSize = 1000*1024^2)
+
+
+Res.dat <- read.csv("World Economic Outlook Database.csv"
+                    , fileEncoding = "UTF-8-BOM"
+                    , stringsAsFactors = FALSE
+                    , check.names = FALSE
+                    )
+
+
+
+# Define UI for application 
+ui <- 
+    
+#The whole page    
+    dashboardPage(
+#Dashboard header
+    dashboardHeader(title = "Data Analysis and Visualisation", titleWidth = 300),
+#Dashboard sidebar
+    dashboardSidebar(
+        sidebarMenu(
+#Tabs
+            menuItem("Timeseries", tabName = "Timeseries"),
+            menuItem("Geospatial", tabName = "Geospatial"),
+            menuItem("About", tabName = "About")
+        )
+    ),
+#Dashboard Body
+    dashboardBody(
+#Tab items
+    tabItems(
+#Map tab cotent
+    tabItem(tabName = "Geospatial",
+            
+        titlePanel("Mapping The Risk Of Measles Outbreak In Wales", windowTitle = "Data Analysis and Visulisation"),
+        br(), br(),
+        p(("My final year project was based on creating a interactive map of the risk of measles outbreak in Wales, 
+           and calculaing the risk of outbreaks spreading by using Spatial Smoothing.
+           Unfortunately, the final map (using plotly) was too large to host here, 
+           but all the code that was used to create it can be found below in my GitHub repository: "),
+          br(),
+          menuItem("Risk Map Code", icon = icon("file-code-o"), 
+                   href = "https://github.com/Kieran-Mg1/Risk-Mapping") 
+          
+          
+          
+          
+          
+          )),
+
+    
+    
+    
+#Graph Tab content
+
+tabItem(tabName = "Timeseries",
+        
+        titlePanel("World Economic Outlook Database 2016", windowTitle = "Data Analysis and Visulisation"),
+        br(), 
+        "The following bar plot is created from a 2016 dataset from the IMF database, 
+        showing each countries previous and forecasted gross current account 
+        balance and gross domestic product prices, for each year up to 2021.",  
+        br(),br(),
+
+        
+          sidebarLayout(
+              sidebarPanel(
+                  em("Select multiple countries and years by typing in the box or using the dropdown."),
+                  br(),br(),
+                  
+                     uiOutput("countryOutput"),
+                     uiOutput("yearOutput"),
+                     uiOutput("vdOutput")
+                     ),
+                                           
+               mainPanel(plotOutput("Timeseries", width = "100%"))
+             
+              
+                                                 
+              ),
+        br(),br(),
+        "Using the 'Shiny' app feature created for R, it is possible to create interactive webpages such as this one. 
+        The user can easily interact with the plot by selecting one or multiple options in each data category to compare the data, 
+        something that would otherwise be difficult in such a large dataset.",
+        br(),br(),
+        "While the plot is relatively simple, creating a shiny app to be interactive (reactive) can be complicated. 
+        One issue that I was caught on for some time was using the `==` operator vs the `%in%` operator in reactivity. The %in% operator checks whether 
+        or not one object is contained in the other object, 
+        whereas == is a logical operator that checks for identity properties.",
+        br(),br(),
+        "The code used to create the plot can be found below, as always I’ve included descriptions at each line of 
+        code to explain the parts I found most challenging to understand initially.",
+        br(),br(),
+        menuItem("Timeseries Code", icon = icon("file-code-o"), 
+                 href = "https://github.com/Kieran-Mg1/Shiny-code"), 
+        br(),br(),
+        
+        ),
+          
+            
+        
+
+#About Tab content
+tabItem(tabName = "About",
+        titlePanel("About me"), br(), br(),
+        
+        "Hello! My name is Kieran and this is my Shiny
+        based dashboard. Here you will find a number of graphs
+        I have produced based on analysis and visualisation of spreadsheet data and mathematical functions",
+        br(),br(),
+        "This site very new, I've only recently completed my degree
+        and now have the time to develop Shiny based apps publicly.
+        I'll constantly update this page with new apps as I create them",
+        br(),br(),
+        "In the future I'd like to host other content from Python, but for now
+        if you have any questions or want to get in touch please email me at the
+        address: Ki3ran@protonmail.com"
+        
+        
+        )
+    
+
+    
+#End of all tabs       
+    )
+#dashboard body
+    )
+#dashboard page
+)
+    
+
+# Define server logic required to draw a histogram
+
+server <- function(input, output) {
+    
+    #Inputs    
+        
+    output$countryOutput <- renderUI(
+        selectInput("countryInput", "Country Name", multiple = TRUE,   
+                                                sort(
+                                                    Res.dat$Country_Name)
+                        
+                                    ))
+    
+   
+    
+    output$yearOutput <- renderUI(
+        selectInput("yearInput", "Year", multiple = TRUE, sort(unique(Res.dat$Year)  )
+                                        
+       
+                                    ))
+    
+    
+    output$vdOutput <- renderUI(
+        selectInput("vdInput", "Value Descriptor",multiple = FALSE,
+                                    sort(
+                                         unique(Res.dat$Value_Descriptor))
+                    
+                                    ))
+    #Reactivity
+    
+   filtered <- reactive({
+       
+       if (is.null(input$countryInput)) {
+           return(NULL)
+       }    
+       
+       if (is.null(input$yearInput)) {
+           return(NULL)
+       }
+       
+       if (is.null(input$vdInput)) {
+           return(NULL)
+       }
+       
+    Res.dat %>% 
+        
+        filter(
+            
+            Country_Name %in% input$countryInput,
+            Year %in% input$yearInput,
+            Value_Descriptor %in% input$vdInput
+                )
+           
+       
+   })
+    
+    #Plot
+     
+   
+   
+    output$Timeseries <- renderPlot({
+    
+        if (is.null(filtered())) {
+            return()
+        }
+        
+        
+        
+    ggplot(filtered(), aes(x=as.character(Year), y=Value, fill =Country_Name)) + 
+        geom_col(position = "dodge", na.rm = TRUE) + xlab("Year") + ylab("Value in Billions($)") +
+          ggtitle("World Economic Outlook Database 2016")
+    
+                                    })
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
