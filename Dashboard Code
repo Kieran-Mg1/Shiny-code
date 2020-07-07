@@ -13,203 +13,263 @@ Res.dat <- read.csv("World Economic Outlook Database.csv"
                     , fileEncoding = "UTF-8-BOM"
                     , stringsAsFactors = FALSE
                     , check.names = FALSE
-                    )
+)
 
 
 
 # Define UI for application 
 ui <- 
     
-#The whole page    
+    #The whole page    
     dashboardPage(
-#Dashboard header
-    dashboardHeader(title = "Data Analysis and Visualisation", titleWidth = 300),
-#Dashboard sidebar
-    dashboardSidebar(
-        sidebarMenu(
-#Tabs
-            menuItem("Timeseries", tabName = "Timeseries"),
-            menuItem("Geospatial", tabName = "Geospatial"),
-            menuItem("About", tabName = "About")
-        )
-    ),
-#Dashboard Body
-    dashboardBody(
-#Tab items
-    tabItems(
-#Map tab cotent
-    tabItem(tabName = "Geospatial",
-            
-        titlePanel("Mapping The Risk Of Measles Outbreak In Wales", windowTitle = "Data Analysis and Visulisation"),
-        br(), br(),
-        p(("My final year project was based on creating a interactive map of the risk of measles outbreak in Wales, 
+        #Dashboard header
+        dashboardHeader(title = "Data Analysis", titleWidth = 300),
+        #Dashboard sidebar
+        dashboardSidebar(
+            sidebarMenu(
+                #Tabs
+                menuItem("Time Series", tabName = "Timeseries"),
+                menuItem("Geospatial", tabName = "Geospatial"),
+                menuItem("Using Linux", tabName = "Linux", badgeLabel = "new", badgeColor = "green"),
+                menuItem("Bayesian Analysis", tabName = "Bays", badgeLabel = "coming soon", badgeColor = "orange"),
+                menuItem("About", tabName = "About")
+            )
+        ),
+        #Dashboard Body
+        dashboardBody(
+            #Tab items
+            tabItems(
+                #Map tab cotent
+                tabItem(tabName = "Geospatial",
+                        
+                        titlePanel("Mapping The Risk Of Measles Outbreak In Wales", windowTitle = "Data Analysis and Visulisation"),
+                        br(), br(),
+                        p(("My final year project was based on creating a interactive map of the risk of measles outbreak in Wales, 
            and calculaing the risk of outbreaks spreading by using Spatial Smoothing.
            Unfortunately, the final map (using plotly) was too large to host here, 
            but all the code that was used to create it can be found below in my GitHub repository: "),
-          br(),
-          menuItem("Risk Map Code", icon = icon("file-code-o"), 
-                   href = "https://github.com/Kieran-Mg1/Risk-Mapping") 
-          
-          
-          
-          
-          
-          )),
-
-    
-    
-    
-#Graph Tab content
-
-tabItem(tabName = "Timeseries",
-        
-        titlePanel("World Economic Outlook Database 2016", windowTitle = "Data Analysis and Visulisation"),
-        br(), 
-        "The following bar plot is created from a 2016 dataset from the IMF database, 
+                          br(),
+                          menuItem("Risk Map Code", icon = icon("file-code-o"), 
+                                   href = "https://github.com/Kieran-Mg1/Risk-Mapping"), 
+                          
+                          
+                          div(imageOutput("map"), style="text-align: center; height: 300px;")
+                          
+                          
+                        )),
+                
+                
+                
+                
+                #Graph Tab content
+                
+                tabItem(tabName = "Timeseries",
+                        
+                        titlePanel("World Economic Outlook Database 2016", windowTitle = "Data Analysis and Visulisation"),
+                        br(), 
+                        "The following bar plot is created from a 2016 dataset from the IMF database, 
         showing each countries previous and forecasted gross current account 
-        balance and gross domestic product prices, for each year up to 2021.",  
-        br(),br(),
-
-        
-          sidebarLayout(
-              sidebarPanel(
-                  em("Select multiple countries and years by typing in the box or using the dropdown."),
-                  br(),br(),
-                  
-                     uiOutput("countryOutput"),
-                     uiOutput("yearOutput"),
-                     uiOutput("vdOutput")
-                     ),
-                                           
-               mainPanel(plotOutput("Timeseries", width = "100%"))
-             
-              
-                                                 
-              ),
-        br(),br(),
-        "Using the 'Shiny' app feature created for R, it is possible to create interactive webpages such as this one. 
-        The user can easily interact with the plot by selecting one or multiple options in each data category to compare the data, 
-        something that would otherwise be difficult in such a large dataset.",
-        br(),br(),
-        "While the plot is relatively simple, creating a shiny app to be interactive (reactive) can be complicated. 
+        balance and gross domestic product prices, for each year from 2010 to 2019.",  
+                        br(),br(),
+                        
+                        
+                        sidebarLayout(
+                            sidebarPanel(
+                                em("Select multiple countries and years by typing in the box or using the dropdown."),
+                                br(),br(),
+                                
+                                uiOutput("countryOutput"),
+                                uiOutput("yearOutput"),
+                                uiOutput("vdOutput")
+                            ),
+                            
+                            mainPanel(plotOutput("Timeseries", width = "100%"))
+                            
+                            
+                            
+                        ),
+                        br(),br(),
+                        "Using the 'Shiny' app feature created for R, it is possible to create 
+                        interactive webpages such as this one. 
+                        The user can easily interact with the plot by selecting one or 
+                        multiple options in each 
+                        data category to compare the data, 
+                        something that would otherwise be difficult in such a large dataset.",
+                        br(),br(),
+                        "While the plot is relatively simple, creating a shiny app to be interactive 
+                        (reactive) can be complicated. 
         One issue that I was caught on for some time was using the `==` operator vs the `%in%` operator in reactivity. The %in% operator checks whether 
         or not one object is contained in the other object, 
         whereas == is a logical operator that checks for identity properties.",
-        br(),br(),
-        "The code used to create the plot can be found below, as always I’ve included descriptions at each line of 
+                        br(),br(),
+                        "The code used to create the plot can be found below, as always I’ve included descriptions at each line of 
         code to explain the parts I found most challenging to understand initially.",
-        br(),br(),
-        menuItem("Timeseries Code", icon = icon("file-code-o"), 
-                 href = "https://github.com/Kieran-Mg1/Shiny-code"), 
-        br(),br(),
-        
-        ),
-          
-            
-        
-
-#About Tab content
-tabItem(tabName = "About",
-        titlePanel("About me"), br(), br(),
-        
-        "Hello! My name is Kieran and this is my Shiny
+                        br(),br(),
+                        menuItem("Timeseries Code", icon = icon("file-code-o"), 
+                                 href = "https://github.com/Kieran-Mg1/Shiny-code"), 
+                        br(),br()
+                        
+                ),
+                
+                #Linux Tab
+                tabItem(tabName = "Linux",
+                        
+                        titlePanel("Rasberry Pi and Linux"),
+                        br(), br(),
+                        tags$b("Summary:"), 
+                        em("For any sort of relatively complex analysis such as Bayesian interference, 
+                        I would not recommend the Raspberry Pi due to a lack of Python IDEs that support 
+                        a AArch64 architecture. 
+                        However, learning to build a Linux system from scratch has been an informative experience. 
+                        I created a small script summarising how to create a 
+                        virtual environment to load python packages on a Linux/Debian system:"),
+                        menuItem("Venv in Linux", icon = icon("file-code-o"), 
+                                 href = "https://github.com/Kieran-Mg1/Linux-Projects"),
+                          br(),br(),
+                        
+                          div(imageOutput("ubImage"), style="text-align: center; height: 300px;"),
+                          p("The past few weeks have been split in between working with my Raspberry Pi 4 and learning the fundamental concepts behind Bayesian analysis, with this section focusing on my experience using Linux system on the Raspberry Pi 4. if you're not familiar with what a Raspberry Pi is, it's not related to any sort of dessert. The Raspberry Pi is essentially a very small (and cheap) computer that supports a variety of Linux based operating systems. The default and recommended operating system is refer to as the Debian system, with the option to install different Unbuntu Linux systems."),
+                          br(),
+                          p("In my experience, the Debian system was a great way to easily break the ice to learning how Linux systems work. However, after re-flashing the SD card of the Raspberry Pi to Unbuntu 20.04 LTS, I quickly found the customization available with this operating system more preferable. Installation of Unbuntu was not quite as easy as the Debian operating system however. If you plan to use the desktop environments available for Ubuntu (which I would strongly recommend) such as Kubuntu, the start up sequence when loading on the Raspberry Pi hangs, and requires a Alt+Shift+F2 followed by ‘startx’ to load the desktop."),
+                          br(),
+                        p("Once the Linux operating system is set up, the next step is downloading the Python packages required to perform the analysis you desire, in my case, Bayesian analysis. Pip3 install is the inbuilt feature of Python 3 to install any packages from the official Pypi repository, but many users of Python do not recommend this, and rightfully so."),
+                        br(),
+                        p("After setting up a virtual environment to download packages in (see the link to code in the summary section), I ran into many error messages when downloading packages. Packages such as Scipy require multiple other packages known as ‘dependencies’, and will not install unless these dependencies already present in the environment. Googling the package name will often have instructions on how to download these are the requirements, but some of the requirements packages themselves also have requirements, and may not have as clear instructions on what their are. As such, those interested in using Python recommend using IDE’s such as Conda or Anaconda, which enable downloading of a package and all of its dependencies in one single command. "),
+                        br(),
+                        p("However this is one of the drawbacks of Raspberry Pi. Anaconda and other IDEs such as Pyzo, which have commands to install packages and all of its dependencies, do not support the arm 64 architecture of the Raspberry Pi as of yet, really rendering it redundant for the Bayesian analysis I wanted to do. However hopefully I can still make use of the Raspberry Pi with simple packages such as an Numpy which do not require many other dependencies not already pre installed with Linux."),
+                        br(),
+                        p("Strangely, downloading Anaconda on my windows laptop throws a compilation error when trying to access a package known as ‘Theano’, which is used in a package ‘Pymc3’ for Bayesian analysis in Python. I won't go into too much detail, but an identical error in the same environment is posted on stack overflow with no answer as of yet, making me think it may actually be a bug with the windows OS. As such, I've improvised and created a model example without actually running any of the packages for Bayesian analysis under the Bayesian tab, and have tried my best to improvise an explanation of what would happen and why.")
+                        
+                        ),
+                          
+                        
+                
+                
+                #About Tab content
+                tabItem(tabName = "About",
+                        titlePanel("About me"), br(), br(),
+                        
+                        "Hello! My name is Kieran and this is my Shiny
         based dashboard. Here you will find a number of graphs
-        I have produced based on analysis and visualisation of spreadsheet data and mathematical functions",
-        br(),br(),
-        "This site very new, I've only recently completed my degree
+        I have produced based on analysis and visualisation of spreadsheet data and mathematical functions.",
+                        br(),br(),
+                        "This site very new, I've only recently completed my degree
         and now have the time to develop Shiny based apps publicly.
-        I'll constantly update this page with new apps as I create them",
-        br(),br(),
-        "In the future I'd like to host other content from Python, but for now
+        I'll constantly update this page with new apps as I create them.",
+                        br(),br(),
+                        "In the future I'd like to host other content from Python, but for now
         if you have any questions or want to get in touch please email me at the
         address: Ki3ran@protonmail.com"
-        
-        
+                        
+                        
+                )
+                
+                
+                
+                #End of all tabs       
+            )
+            #dashboard body
         )
-    
+        #dashboard page
+    )
 
-    
-#End of all tabs       
-    )
-#dashboard body
-    )
-#dashboard page
-)
-    
 
 # Define server logic required to draw a histogram
 
 server <- function(input, output) {
     
     #Inputs    
-        
+    
     output$countryOutput <- renderUI(
         selectInput("countryInput", "Country Name", multiple = TRUE,   
-                                                sort(
-                                                    Res.dat$Country_Name)
-                        
-                                    ))
+                    sort(
+                        Res.dat$Country_Name)
+                    
+        ))
     
-   
+    
     
     output$yearOutput <- renderUI(
         selectInput("yearInput", "Year", multiple = TRUE, sort(unique(Res.dat$Year)  )
-                                        
-       
-                                    ))
+                    
+                    
+        ))
     
     
     output$vdOutput <- renderUI(
         selectInput("vdInput", "Value Descriptor",multiple = FALSE,
-                                    sort(
-                                         unique(Res.dat$Value_Descriptor))
+                    sort(
+                        unique(Res.dat$Value_Descriptor))
                     
-                                    ))
+        ))
     #Reactivity
     
-   filtered <- reactive({
-       
-       if (is.null(input$countryInput)) {
-           return(NULL)
-       }    
-       
-       if (is.null(input$yearInput)) {
-           return(NULL)
-       }
-       
-       if (is.null(input$vdInput)) {
-           return(NULL)
-       }
-       
-    Res.dat %>% 
+    filtered <- reactive({
         
-        filter(
+        if (is.null(input$countryInput)) {
+            return(NULL)
+        }    
+        
+        if (is.null(input$yearInput)) {
+            return(NULL)
+        }
+        
+        if (is.null(input$vdInput)) {
+            return(NULL)
+        }
+        
+        Res.dat %>% 
             
-            Country_Name %in% input$countryInput,
-            Year %in% input$yearInput,
-            Value_Descriptor %in% input$vdInput
-                )
-           
-       
-   })
+            filter(
+                
+                Country_Name %in% input$countryInput,
+                Year %in% input$yearInput,
+                Value_Descriptor %in% input$vdInput
+            )
+        
+        
+    })
     
     #Plot
-     
-   
-   
-    output$Timeseries <- renderPlot({
     
+    
+    
+    output$Timeseries <- renderPlot({
+        
         if (is.null(filtered())) {
             return()
         }
         
         
         
-    ggplot(filtered(), aes(x=as.character(Year), y=Value, fill =Country_Name)) + 
-        geom_col(position = "dodge", na.rm = TRUE) + xlab("Year") + ylab("Value in Billions($)") +
-          ggtitle("World Economic Outlook Database 2016")
+        ggplot(filtered(), aes(x=as.character(Year), y=Value, fill =Country_Name)) + 
+            geom_col(position = "dodge", na.rm = TRUE) + xlab("Year") + ylab("Value in Billions($)") +
+            ggtitle("World Economic Outlook Database 2016")
+        
+    })
+
+
+    output$ubImage <- renderImage({
+        return(list(
+            src = "./Images/unbuntu.jpg",
+            contentType = "Image/jpeg",
+            width = 285,
+            height = 285    
+        ))
+    }, deleteFile = FALSE)
+     
+    output$map <- renderImage({
+        return(list(
+            src = "./Images/map.jpg",
+            contentType = "Image/jpeg",
+            width = 600,
+            height = 400    
+        ))
+    }, deleteFile = FALSE)
     
-                                    })
-}
+
+#Close server function
+}    
+            
 # Run the application 
 shinyApp(ui = ui, server = server)
